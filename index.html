@@ -9,13 +9,16 @@
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    transition: background 0.4s;
   }
+  body.mode-food   { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+  body.mode-drink  { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+  body.mode-none   { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
 
   .screen {
     display: none;
@@ -27,10 +30,7 @@
   .screen.active { display: flex; }
 
   /* ===== 开始页 ===== */
-  #start-screen {
-    text-align: center;
-    gap: 24px;
-  }
+  #start-screen { text-align: center; gap: 24px; }
 
   .main-emoji { font-size: 80px; animation: bounce 2s infinite; }
   @keyframes bounce {
@@ -51,21 +51,37 @@
     line-height: 1.6;
   }
 
-  .btn-start {
+  .mode-buttons {
+    display: flex;
+    gap: 16px;
     margin-top: 8px;
-    padding: 18px 48px;
-    font-size: 20px;
+    width: 100%;
+  }
+
+  .btn-mode {
+    flex: 1;
+    padding: 20px 0;
+    font-size: 18px;
     font-weight: 700;
-    color: #764ba2;
-    background: #fff;
     border: none;
-    border-radius: 50px;
+    border-radius: 20px;
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     transition: transform 0.15s, box-shadow 0.15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
   }
-  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
-  .btn-start:active { transform: translateY(0); }
+  .btn-mode:hover { transform: translateY(-3px); box-shadow: 0 14px 32px rgba(0,0,0,0.25); }
+  .btn-mode:active { transform: translateY(0); }
+
+  .btn-food  { background: #fff; color: #764ba2; }
+  .btn-drink { background: rgba(255,255,255,0.2); color: #fff; border: 2px solid rgba(255,255,255,0.5); }
+
+  .btn-mode-emoji { font-size: 36px; }
+  .btn-mode-label { font-size: 17px; font-weight: 700; }
+  .btn-mode-sub   { font-size: 12px; opacity: 0.7; font-weight: 400; }
 
   /* ===== 对决页 ===== */
   #battle-screen { gap: 20px; }
@@ -74,7 +90,6 @@
     font-size: 14px;
     color: rgba(255,255,255,0.75);
     letter-spacing: 1px;
-    text-transform: uppercase;
   }
 
   .battle-title {
@@ -105,7 +120,7 @@
   .card:active { transform: scale(0.97); }
 
   .card-emoji { font-size: 48px; margin-bottom: 12px; }
-  .card-name { font-size: 22px; font-weight: 700; color: #333; }
+  .card-name  { font-size: 20px; font-weight: 700; color: #333; }
 
   .card.winner {
     background: linear-gradient(135deg, #f093fb, #f5576c);
@@ -128,7 +143,6 @@
     align-self: center;
   }
 
-  /* 倒计时进度条 */
   .timer-wrap {
     width: 100%;
     background: rgba(255,255,255,0.25);
@@ -143,10 +157,7 @@
     transition: width 0.1s linear;
   }
 
-  .timer-text {
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-  }
+  .timer-text { font-size: 13px; color: rgba(255,255,255,0.7); }
 
   /* ===== 结果页 ===== */
   #result-screen { gap: 24px; text-align: center; }
@@ -157,11 +168,7 @@
     to   { transform: scale(1) rotate(0deg);   opacity: 1; }
   }
 
-  .result-label {
-    font-size: 16px;
-    color: rgba(255,255,255,0.8);
-    letter-spacing: 2px;
-  }
+  .result-label { font-size: 16px; color: rgba(255,255,255,0.8); letter-spacing: 2px; }
 
   .result-name {
     font-size: 48px;
@@ -184,37 +191,49 @@
     line-height: 1.6;
   }
 
-  .btn-retry {
-    margin-top: 8px;
-    padding: 16px 44px;
-    font-size: 18px;
+  .result-btns { display: flex; gap: 12px; margin-top: 8px; }
+
+  .btn-retry, .btn-back {
+    padding: 16px 32px;
+    font-size: 16px;
     font-weight: 700;
-    color: #764ba2;
-    background: #fff;
     border: none;
     border-radius: 50px;
     cursor: pointer;
     box-shadow: 0 8px 24px rgba(0,0,0,0.2);
     transition: transform 0.15s, box-shadow 0.15s;
   }
-  .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
-  .btn-retry:active { transform: translateY(0); }
+  .btn-retry { color: #764ba2; background: #fff; }
+  .btn-back  { color: #fff; background: rgba(255,255,255,0.2); border: 2px solid rgba(255,255,255,0.4); }
+  .btn-retry:hover, .btn-back:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
+  .btn-retry:active, .btn-back:active { transform: translateY(0); }
 </style>
 </head>
-<body>
+<body class="mode-none">
 
 <!-- 开始页 -->
 <div id="start-screen" class="screen active">
   <div class="main-emoji">🍜</div>
   <div class="main-title">今天吃什么？</div>
   <div class="main-subtitle">纠结症克星<br>每轮只问你一个问题，5秒内做决定</div>
-  <button class="btn-start" onclick="startGame()">开始决斗！</button>
+  <div class="mode-buttons">
+    <button class="btn-mode btn-food" onclick="startGame('food')">
+      <span class="btn-mode-emoji">🍛</span>
+      <span class="btn-mode-label">选主食</span>
+      <span class="btn-mode-sub">吃啥好呢</span>
+    </button>
+    <button class="btn-mode btn-drink" onclick="startGame('drink')">
+      <span class="btn-mode-emoji">🧋</span>
+      <span class="btn-mode-label">选饮料</span>
+      <span class="btn-mode-sub">喝啥好呢</span>
+    </button>
+  </div>
 </div>
 
 <!-- 对决页 -->
 <div id="battle-screen" class="screen">
   <div class="round-info" id="round-info">第 1 轮 · 共 3 轮</div>
-  <div class="battle-title">你更想吃哪个？</div>
+  <div class="battle-title" id="battle-title">你更想吃哪个？</div>
   <div class="cards">
     <div class="card" id="card-a" onclick="pick(0)">
       <div class="card-emoji" id="emoji-a">🍛</div>
@@ -234,39 +253,68 @@
 
 <!-- 结果页 -->
 <div id="result-screen" class="screen">
-  <div class="result-label">今天就吃</div>
+  <div class="result-label" id="result-label">今天就吃</div>
   <div class="result-emoji" id="result-emoji">🍛</div>
   <div class="result-name" id="result-name">黄焖鸡</div>
   <div class="result-quote" id="result-quote">命中注定，干饭人出发！🚀</div>
-  <button class="btn-retry" onclick="restart()">再来一次</button>
+  <div class="result-btns">
+    <button class="btn-back" onclick="restart()">换个模式</button>
+    <button class="btn-retry" onclick="retryMode()">再来一次</button>
+  </div>
 </div>
 
 <script>
 const FOODS = [
-  { name: "黄焖鸡", emoji: "🍛" },
-  { name: "麻辣烫", emoji: "🌶️" },
-  { name: "沙县小吃", emoji: "🥟" },
-  { name: "兰州拉面", emoji: "🍜" },
-  { name: "米线", emoji: "🍝" },
-  { name: "煲仔饭", emoji: "🍚" },
-  { name: "炒饭", emoji: "🍳" },
-  { name: "包子", emoji: "🥙" },
+  { name: "袁记云饺", emoji: "🥟" },
+  { name: "真功夫冬菇滑鸡", emoji: "🍗" },
+  { name: "金戈戈烧腊", emoji: "🍖" },
+  { name: "雪乡情东北菜", emoji: "🥘" },
+  { name: "紫菜包饭", emoji: "🍙" },
+  { name: "绿茶餐厅", emoji: "🍵" },
+  { name: "拌将麻辣拌", emoji: "🌶️" },
+  { name: "日式猪扒饭", emoji: "🍱" },
   { name: "麦当劳", emoji: "🍔" },
-  { name: "肯德基", emoji: "🍗" },
+  { name: "老乡鸡", emoji: "🍗" },
+  { name: "香油鸡", emoji: "🐓" },
+  { name: "韩式拌饭", emoji: "🍚" },
   { name: "披萨", emoji: "🍕" },
-  { name: "寿司", emoji: "🍣" },
-  { name: "日式拉面", emoji: "🍥" },
-  { name: "韩式炸鸡", emoji: "🍖" },
-  { name: "部队锅", emoji: "🫕" },
-  { name: "沙拉", emoji: "🥗" },
-  { name: "汉堡", emoji: "🍟" },
-  { name: "螺蛳粉", emoji: "🦺" },
-  { name: "冒菜", emoji: "🥘" },
-  { name: "烤肉饭", emoji: "🥩" },
-  
+  { name: "炸鸡", emoji: "🍗" },
+  { name: "煲仔饭", emoji: "🍲" },
+  { name: "北京烤鸭", emoji: "🦆" },
+  { name: "小杨生煎", emoji: "🥟" },
+  { name: "过桥米线", emoji: "🍜" },
+  { name: "鸭血粉丝汤", emoji: "🍵" },
+  { name: "汉堡王", emoji: "🍔" },
+  { name: "塔斯汀", emoji: "🌮" },
+  { name: "麻吉士林卤肉饭", emoji: "🍚" },
+  { name: "外婆家", emoji: "🥢" },
+  { name: "大米先生", emoji: "🍛" },
+  { name: "KPro", emoji: "🥗" },
+  { name: "手撕鸡", emoji: "🐔" },
+  { name: "螺蛳粉", emoji: "🍜" },
+  { name: "老友粉", emoji: "🍝" },
+  { name: "炒粉", emoji: "🍳" },
+  { name: "米仓食堂", emoji: "🍱" },
+  { name: "海底捞", emoji: "🍲" },
 ];
 
-const QUOTES = [
+const DRINKS = [
+  { name: "茉莉奶白", emoji: "🧋" },
+  { name: "珍珠大将军", emoji: "🧋" },
+  { name: "宝藏绿洲", emoji: "🍵" },
+  { name: "喜茶", emoji: "🫖" },
+  { name: "一点点", emoji: "🥤" },
+  { name: "古茗", emoji: "🧋" },
+  { name: "KOI", emoji: "🐟" },
+  { name: "初茶", emoji: "🍃" },
+  { name: "去茶山", emoji: "⛰️" },
+  { name: "茉酸奶", emoji: "🥛" },
+  { name: "霸王茶姬", emoji: "👑" },
+  { name: "煲珠公", emoji: "🫧" },
+  { name: "奈雪", emoji: "🍓" },
+];
+
+const FOOD_QUOTES = [
   "命中注定，干饭人出发！🚀",
   "你的胃已经做好准备了！🔥",
   "今天就它了，别纠结！💪",
@@ -275,11 +323,20 @@ const QUOTES = [
   "这就是今天的答案，YYDS！👑",
 ];
 
-let bracket = [];       // 当前轮次的选手列表
-let matchIndex = 0;     // 当前轮次中第几场
-let roundWinners = [];  // 本轮胜者
-let totalRounds = 0;    // 总轮次数（动态计算）
+const DRINK_QUOTES = [
+  "就决定是你了，快去点！🧋",
+  "今天的快乐就靠它了！✨",
+  "喝它，没错的！💪",
+  "宇宙的选择，信命！🚀",
+  "这杯稳了，下单吧！⚡",
+];
+
+let bracket = [];
+let matchIndex = 0;
+let roundWinners = [];
+let totalRounds = 0;
 let currentRound = 1;
+let currentMode = "food";
 
 let timer = null;
 let timerSeconds = 5;
@@ -300,13 +357,26 @@ function calcTotalRounds(n) {
   return rounds;
 }
 
-function startGame() {
-  const pool = shuffle(FOODS).slice(0, 8);
+function startGame(mode) {
+  currentMode = mode;
+  let pool = mode === "drink"
+    ? shuffle(DRINKS).slice(0, 8)
+    : shuffle(FOODS).slice(0, 8);
+  if (mode === "drink") {
+    pool.push({ name: "尝新", emoji: "🌟" });
+  }
+  if (mode === "food") {
+    pool.push({ name: "去尝新", emoji: "🌟" });
+  }
   bracket = pool;
   matchIndex = 0;
   roundWinners = [];
   currentRound = 1;
   totalRounds = calcTotalRounds(bracket.length);
+
+  document.body.className = mode === "drink" ? "mode-drink" : "mode-food";
+  document.getElementById("battle-title").textContent =
+    mode === "drink" ? "你更想喝哪个？" : "你更想吃哪个？";
 
   showScreen("battle-screen");
   showNextMatch();
@@ -314,7 +384,6 @@ function startGame() {
 
 function showNextMatch() {
   if (matchIndex + 1 > Math.floor(bracket.length / 2)) {
-    // 本轮结束，处理奇数剩余
     if (bracket.length % 2 === 1) {
       roundWinners.push(bracket[bracket.length - 1]);
     }
@@ -331,14 +400,12 @@ function showNextMatch() {
   const a = bracket[matchIndex * 2];
   const b = bracket[matchIndex * 2 + 1];
 
-  document.getElementById("round-info").textContent =
-    `第 ${currentRound} 轮 · 共 ${totalRounds} 轮`;
+  document.getElementById("round-info").textContent = `第 ${currentRound} 轮 · 共 ${totalRounds} 轮`;
   document.getElementById("emoji-a").textContent = a.emoji;
   document.getElementById("name-a").textContent = a.name;
   document.getElementById("emoji-b").textContent = b.emoji;
   document.getElementById("name-b").textContent = b.name;
 
-  // 重置卡片状态
   document.getElementById("card-a").className = "card";
   document.getElementById("card-b").className = "card";
   document.getElementById("card-a").style.pointerEvents = "";
@@ -370,10 +437,9 @@ function updateTimerUI() {
     s > 0 ? `${s} 秒后自动随机选择…` : "随机选择中…";
 }
 
-function pick(side, auto = false) {
+function pick(side) {
   clearInterval(timer);
 
-  // 禁止再次点击
   document.getElementById("card-a").style.pointerEvents = "none";
   document.getElementById("card-b").style.pointerEvents = "none";
 
@@ -390,14 +456,24 @@ function pick(side, auto = false) {
 }
 
 function showResult(food) {
+  const quotes = currentMode === "drink" ? DRINK_QUOTES : FOOD_QUOTES;
+  const isNew = food.name === "去尝新" || food.name === "尝新";
+  document.getElementById("result-label").textContent =
+    currentMode === "drink" ? "今天就喝" : "今天就吃";
   document.getElementById("result-emoji").textContent = food.emoji;
   document.getElementById("result-name").textContent = food.name;
-  document.getElementById("result-quote").textContent =
-    QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  document.getElementById("result-quote").textContent = isNew
+    ? "今天勇敢一次，探索新大陆！🗺️"
+    : quotes[Math.floor(Math.random() * quotes.length)];
   showScreen("result-screen");
 }
 
+function retryMode() {
+  startGame(currentMode);
+}
+
 function restart() {
+  document.body.className = "mode-none";
   showScreen("start-screen");
 }
 
