@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>今天吃什么？</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 480px;
+  }
+  .screen.active { display: flex; }
+
+  /* ===== 开始页 ===== */
+  #start-screen {
+    text-align: center;
+    gap: 24px;
+  }
+
+  .main-emoji { font-size: 80px; animation: bounce 2s infinite; }
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .main-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+
+  .main-subtitle {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+  }
+
+  .btn-start {
+    margin-top: 8px;
+    padding: 18px 48px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #764ba2;
+    background: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-start:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
+  .btn-start:active { transform: translateY(0); }
+
+  /* ===== 对决页 ===== */
+  #battle-screen { gap: 20px; }
+
+  .round-info {
+    font-size: 14px;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .battle-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+  }
+
+  .cards {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+  }
+
+  .card {
+    flex: 1;
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 16px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.3s;
+    user-select: none;
+  }
+  .card:hover { transform: translateY(-4px) scale(1.03); box-shadow: 0 16px 40px rgba(0,0,0,0.2); }
+  .card:active { transform: scale(0.97); }
+
+  .card-emoji { font-size: 48px; margin-bottom: 12px; }
+  .card-name { font-size: 22px; font-weight: 700; color: #333; }
+
+  .card.winner {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    transform: scale(1.05);
+    box-shadow: 0 16px 48px rgba(240,93,251,0.4);
+  }
+  .card.winner .card-name { color: #fff; }
+
+  .card.loser {
+    opacity: 0.25;
+    transform: scale(0.95);
+    pointer-events: none;
+  }
+
+  .vs-badge {
+    font-size: 24px;
+    font-weight: 900;
+    color: rgba(255,255,255,0.9);
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  /* 倒计时进度条 */
+  .timer-wrap {
+    width: 100%;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50px;
+    height: 10px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    background: #fff;
+    border-radius: 50px;
+    transition: width 0.1s linear;
+  }
+
+  .timer-text {
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
+  }
+
+  /* ===== 结果页 ===== */
+  #result-screen { gap: 24px; text-align: center; }
+
+  .result-emoji { font-size: 90px; animation: spin-in 0.5s ease-out; }
+  @keyframes spin-in {
+    from { transform: scale(0) rotate(-180deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+  }
+
+  .result-label {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    letter-spacing: 2px;
+  }
+
+  .result-name {
+    font-size: 48px;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    animation: pop-in 0.4s 0.2s ease-out both;
+  }
+  @keyframes pop-in {
+    from { transform: scale(0.5); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+
+  .result-quote {
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    background: rgba(255,255,255,0.15);
+    border-radius: 12px;
+    padding: 12px 20px;
+    line-height: 1.6;
+  }
+
+  .btn-retry {
+    margin-top: 8px;
+    padding: 16px 44px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #764ba2;
+    background: #fff;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .btn-retry:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,0,0,0.25); }
+  .btn-retry:active { transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- 开始页 -->
+<div id="start-screen" class="screen active">
+  <div class="main-emoji">🍜</div>
+  <div class="main-title">今天吃什么？</div>
+  <div class="main-subtitle">纠结症克星<br>每轮只问你一个问题，5秒内做决定</div>
+  <button class="btn-start" onclick="startGame()">开始决斗！</button>
+</div>
+
+<!-- 对决页 -->
+<div id="battle-screen" class="screen">
+  <div class="round-info" id="round-info">第 1 轮 · 共 3 轮</div>
+  <div class="battle-title">你更想吃哪个？</div>
+  <div class="cards">
+    <div class="card" id="card-a" onclick="pick(0)">
+      <div class="card-emoji" id="emoji-a">🍛</div>
+      <div class="card-name" id="name-a">黄焖鸡</div>
+    </div>
+    <div class="vs-badge">VS</div>
+    <div class="card" id="card-b" onclick="pick(1)">
+      <div class="card-emoji" id="emoji-b">🍜</div>
+      <div class="card-name" id="name-b">兰州拉面</div>
+    </div>
+  </div>
+  <div class="timer-wrap">
+    <div class="timer-bar" id="timer-bar" style="width:100%"></div>
+  </div>
+  <div class="timer-text" id="timer-text">5 秒后自动随机选择…</div>
+</div>
+
+<!-- 结果页 -->
+<div id="result-screen" class="screen">
+  <div class="result-label">今天就吃</div>
+  <div class="result-emoji" id="result-emoji">🍛</div>
+  <div class="result-name" id="result-name">黄焖鸡</div>
+  <div class="result-quote" id="result-quote">命中注定，干饭人出发！🚀</div>
+  <button class="btn-retry" onclick="restart()">再来一次</button>
+</div>
+
+<script>
+const FOODS = [
+  { name: "黄焖鸡", emoji: "🍛" },
+  { name: "麻辣烫", emoji: "🌶️" },
+  { name: "沙县小吃", emoji: "🥟" },
+  { name: "兰州拉面", emoji: "🍜" },
+  { name: "米线", emoji: "🍝" },
+  { name: "煲仔饭", emoji: "🍚" },
+  { name: "炒饭", emoji: "🍳" },
+  { name: "包子", emoji: "🥙" },
+  { name: "麦当劳", emoji: "🍔" },
+  { name: "肯德基", emoji: "🍗" },
+  { name: "披萨", emoji: "🍕" },
+  { name: "寿司", emoji: "🍣" },
+  { name: "日式拉面", emoji: "🍥" },
+  { name: "韩式炸鸡", emoji: "🍖" },
+  { name: "部队锅", emoji: "🫕" },
+  { name: "沙拉", emoji: "🥗" },
+  { name: "汉堡", emoji: "🍟" },
+  { name: "螺蛳粉", emoji: "🦺" },
+  { name: "冒菜", emoji: "🥘" },
+  { name: "烤肉饭", emoji: "🥩" },
+];
+
+const QUOTES = [
+  "命中注定，干饭人出发！🚀",
+  "你的胃已经做好准备了！🔥",
+  "今天就它了，别纠结！💪",
+  "宇宙选择了它，信命！✨",
+  "快去下单，机不可失！⚡",
+  "这就是今天的答案，YYDS！👑",
+];
+
+let bracket = [];       // 当前轮次的选手列表
+let matchIndex = 0;     // 当前轮次中第几场
+let roundWinners = [];  // 本轮胜者
+let totalRounds = 0;    // 总轮次数（动态计算）
+let currentRound = 1;
+
+let timer = null;
+let timerSeconds = 5;
+const TIMER_DURATION = 5;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function calcTotalRounds(n) {
+  let rounds = 0;
+  while (n > 1) { n = Math.ceil(n / 2); rounds++; }
+  return rounds;
+}
+
+function startGame() {
+  const pool = shuffle(FOODS).slice(0, 8);
+  bracket = pool;
+  matchIndex = 0;
+  roundWinners = [];
+  currentRound = 1;
+  totalRounds = calcTotalRounds(bracket.length);
+
+  showScreen("battle-screen");
+  showNextMatch();
+}
+
+function showNextMatch() {
+  if (matchIndex + 1 > Math.floor(bracket.length / 2)) {
+    // 本轮结束，处理奇数剩余
+    if (bracket.length % 2 === 1) {
+      roundWinners.push(bracket[bracket.length - 1]);
+    }
+    if (roundWinners.length === 1) {
+      showResult(roundWinners[0]);
+      return;
+    }
+    bracket = roundWinners;
+    roundWinners = [];
+    matchIndex = 0;
+    currentRound++;
+  }
+
+  const a = bracket[matchIndex * 2];
+  const b = bracket[matchIndex * 2 + 1];
+
+  document.getElementById("round-info").textContent =
+    `第 ${currentRound} 轮 · 共 ${totalRounds} 轮`;
+  document.getElementById("emoji-a").textContent = a.emoji;
+  document.getElementById("name-a").textContent = a.name;
+  document.getElementById("emoji-b").textContent = b.emoji;
+  document.getElementById("name-b").textContent = b.name;
+
+  // 重置卡片状态
+  document.getElementById("card-a").className = "card";
+  document.getElementById("card-b").className = "card";
+  document.getElementById("card-a").style.pointerEvents = "";
+  document.getElementById("card-b").style.pointerEvents = "";
+
+  startTimer();
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timerSeconds = TIMER_DURATION;
+  updateTimerUI();
+
+  timer = setInterval(() => {
+    timerSeconds -= 0.1;
+    updateTimerUI();
+    if (timerSeconds <= 0) {
+      clearInterval(timer);
+      pick(Math.random() < 0.5 ? 0 : 1, true);
+    }
+  }, 100);
+}
+
+function updateTimerUI() {
+  const pct = Math.max(0, (timerSeconds / TIMER_DURATION) * 100);
+  document.getElementById("timer-bar").style.width = pct + "%";
+  const s = Math.ceil(Math.max(0, timerSeconds));
+  document.getElementById("timer-text").textContent =
+    s > 0 ? `${s} 秒后自动随机选择…` : "随机选择中…";
+}
+
+function pick(side, auto = false) {
+  clearInterval(timer);
+
+  // 禁止再次点击
+  document.getElementById("card-a").style.pointerEvents = "none";
+  document.getElementById("card-b").style.pointerEvents = "none";
+
+  const winCard = side === 0 ? "card-a" : "card-b";
+  const loseCard = side === 0 ? "card-b" : "card-a";
+  document.getElementById(winCard).className = "card winner";
+  document.getElementById(loseCard).className = "card loser";
+
+  const winner = bracket[matchIndex * 2 + side];
+  roundWinners.push(winner);
+  matchIndex++;
+
+  setTimeout(() => showNextMatch(), 600);
+}
+
+function showResult(food) {
+  document.getElementById("result-emoji").textContent = food.emoji;
+  document.getElementById("result-name").textContent = food.name;
+  document.getElementById("result-quote").textContent =
+    QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  showScreen("result-screen");
+}
+
+function restart() {
+  showScreen("start-screen");
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+</script>
+</body>
+</html>
